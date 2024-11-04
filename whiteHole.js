@@ -1,71 +1,47 @@
 const queryTargets = ["div", "span", "img", "input"]
 const elementsNodes = document.body.querySelectorAll("*")
-const elements = Array.from(elementsNodes)
-
-const cloneList = elements.map((element) => {
-  const rect = element.getBoundingClientRect()
-  const x = rect.left + window.scrollX
-  const y = rect.top + window.scrollY
-  const width = rect.width
-  const height = rect.height
-
-  const clone = element.cloneNode(true)
-  Array.from(clone.children).forEach((child) => {
-    clone.removeChild(child)
-  })
-  clone.style.position = "absolute"
-  clone.style.left = `${x}px`
-  clone.style.top = `${y}px`
-  clone.height = `${height}px`
-  clone.width = `${width}px`
-  return clone
-})
-
-document.body.style.position = "relative"
-while (document.body.firstChild) {
-  document.body.removeChild(document.body.firstChild)
-}
-cloneList.forEach((element) => {
-  document.body.appendChild(element)
-})
-// const elementData = selectedElements.map((element) => {
-//   const rect = element.getBoundingClientRect()
-//   const x = rect.left + window.scrollX
-//   const y = rect.top + window.scrollY
-//   console.log(y)
-//   const width = rect.width
-//   const height = rect.height
-//   return { x: x, y: y, width: width, height: height }
-// })
-// selectedElements.forEach((element, index) => {
-//   //   const rect = element.getBoundingClientRect()
-//   //   const x = rect.left + window.scrollX
-//   //   const y = rect.top + window.scrollY
-//   const data = elementData[index]
-//   element.style.position = "fixed"
-//   element.style.left = `${data.x}px`
-//   element.style.top = `${data.y}px`
-//   element.height = `${data.height}px`
-//   element.width = `${data.width}px`
-// })
+let elementsArray = Array.from(elementsNodes)
 
 const centerX = window.innerWidth / 2
 const centerY = window.innerHeight / 2
 
-const lerp = (from, to, percentage) => {
-  const dist = to - from
-  const move = dist * percentage
-  return from + move
+const findEndChildren = (elements) => {
+  let result = []
+  for (let i = elements.length - 1; i > 0; i--) {
+    const element = elements[i]
+    const children = element.querySelectorAll(":scope > *")
+    if (Array.from(children).length === 0) {
+      const rect = element.getBoundingClientRect()
+      const x = rect.left + rect.width / 2 + window.scrollX
+      const y = rect.top + rect.height / 2 + window.scrollY
+      const moveX = centerX - x
+      const moveY = centerY - y
+      const increment = 0.001
+      const progress = 0
+      result.push({
+        target: element,
+        moveX: moveX,
+        moveY: moveY,
+        increment: increment,
+        progress: progress,
+      })
+      elements.splice(i, 1)
+    }
+  }
+  return result
 }
 
+let endChildren = findEndChildren(elementsArray)
+
 const animate = () => {
-  selectedElements.forEach((element) => {
-    const rect = element.getBoundingClientRect()
-    const x = rect.left + rect.width / 2
-    const y = rect.top + rect.height / 2
-    const moveX = lerp(x, centerX, 0.1)
-    const moveY = lerp(y, centerY, 0.1)
-    element.style.transform = `translateX(${moveX}px) translateY(${moveY}px)`
+  endChildren.forEach((element) => {
+    const { target, moveX, moveY, increment, progress } = element
+    element.progress = progress + increment
+    target.style.transform = `translateX(${moveX * progress}px) translateY(${
+      moveY * progress
+    }px)`
   })
+  for (let i = endChildren.length - 1; i > 0; i--) {}
+  window.requestAnimationFrame(animate)
 }
-//animate()
+animate()

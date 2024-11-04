@@ -1,11 +1,9 @@
 const elementsNodes = document.body.querySelectorAll("*")
 const elementsArray = Array.from(elementsNodes)
-const elements = elementsArray.filter(
-  (element) =>
-    !element.firstChild ||
-    (element.childNodes.length === 1 &&
-      element.firstChild.nodeType === Node.TEXT_NODE)
-)
+const elements = elementsArray.filter((element) => {
+  const children = element.querySelectorAll("*")
+  return Array.from(children).length === 0
+})
 console.log(elements)
 
 const style = document.createElement("style")
