@@ -1,35 +1,53 @@
 const queryTargets = ["div", "span", "img", "input"]
-const elementsNode = document.querySelectorAll(queryTargets.join(","))
-const elementsArray = Array.from(elementsNode)
-const selectedElements = elementsArray.filter((element) => {
-  let parentCount = 0
-  let currentElement = element
-  while (currentElement.parentElement) {
-    parentCount++
-    currentElement = currentElement.parentElement
-  }
-  return true
-})
-const elementData = selectedElements.map((element) => {
+const elementsNodes = document.body.querySelectorAll("*")
+const elements = Array.from(elementsNodes)
+
+const cloneList = elements.map((element) => {
   const rect = element.getBoundingClientRect()
   const x = rect.left + window.scrollX
   const y = rect.top + window.scrollY
-  console.log(y)
   const width = rect.width
   const height = rect.height
-  return { x: x, y: y, width: width, height: height }
+
+  const clone = element.cloneNode(true)
+  Array.from(clone.children).forEach((child) => {
+    clone.removeChild(child)
+  })
+  clone.style.position = "absolute"
+  clone.style.left = `${x}px`
+  clone.style.top = `${y}px`
+  clone.height = `${height}px`
+  clone.width = `${width}px`
+  return clone
 })
-selectedElements.forEach((element, index) => {
-  //   const rect = element.getBoundingClientRect()
-  //   const x = rect.left + window.scrollX
-  //   const y = rect.top + window.scrollY
-  const data = elementData[index]
-  element.style.position = "fixed"
-  element.style.left = `${data.x}px`
-  element.style.top = `${data.y}px`
-  element.height = `${data.height}px`
-  element.width = `${data.width}px`
+
+document.body.style.position = "relative"
+while (document.body.firstChild) {
+  document.body.removeChild(document.body.firstChild)
+}
+cloneList.forEach((element) => {
+  document.body.appendChild(element)
 })
+// const elementData = selectedElements.map((element) => {
+//   const rect = element.getBoundingClientRect()
+//   const x = rect.left + window.scrollX
+//   const y = rect.top + window.scrollY
+//   console.log(y)
+//   const width = rect.width
+//   const height = rect.height
+//   return { x: x, y: y, width: width, height: height }
+// })
+// selectedElements.forEach((element, index) => {
+//   //   const rect = element.getBoundingClientRect()
+//   //   const x = rect.left + window.scrollX
+//   //   const y = rect.top + window.scrollY
+//   const data = elementData[index]
+//   element.style.position = "fixed"
+//   element.style.left = `${data.x}px`
+//   element.style.top = `${data.y}px`
+//   element.height = `${data.height}px`
+//   element.width = `${data.width}px`
+// })
 
 const centerX = window.innerWidth / 2
 const centerY = window.innerHeight / 2
